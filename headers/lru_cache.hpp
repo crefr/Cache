@@ -1,6 +1,7 @@
-#include <iostream>
 #include <list>
 #include <unordered_map>
+
+using std::size_t;
 
 template <typename T, typename KeyT>
 class LruCache {
@@ -11,10 +12,10 @@ class LruCache {
     std::unordered_map<KeyT, ListIt> map_;
 
 public:
-    LruCache(size_t size) : size_(size) {};
-    ~LruCache() {};
+    LruCache(size_t size) : size_(size) {}
+    ~LruCache() {}
 
-    bool full() const { return data_.size() == size_; };
+    bool full() const { return data_.size() == size_; }
 
     template <typename F>
     bool lookup_update(KeyT key, F slow_get_page);
