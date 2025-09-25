@@ -28,7 +28,7 @@ struct HashList {
         map[key] = list.begin();
     }
 
-    size_t size() {
+    size_t size() const {
         return list.size();
     }
 };
@@ -45,7 +45,7 @@ class Cache2Q {
     HashList<KeyT, KeyT> A1_out;         // Stores only ids but still needs hashlist
 
     bool full() const {
-        return (Am.list.size() + A1_in.list.size()) == size;
+        return (Am.size() + A1_in.size()) == size;
     }
 
     void reclaim_for_page();
@@ -56,8 +56,6 @@ public:
         Kout = (size_t) (((double) size) * out_part);
     }
     ~Cache2Q() {}
-
-    size_t get_real_size() const { return Am.list.size() + A1_in.list.size(); }
 
     template <typename F>
     bool lookup_update(KeyT key, F slow_get_page);
