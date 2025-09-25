@@ -1,44 +1,48 @@
 #include <list>
 #include <unordered_map>
+#include <utility>
 
 using std::size_t;
 
-// List and hasmap combined
+// List and hasmap combined.
+// List contains pairs with key and value, hashmap
+// allows quick access by the key.
 template <typename KeyT, typename T>
 struct HashList {
-    std::list<T> list;
+    using pairT = typename std::pair<KeyT, T>;
+    std::list<pairT> list;
 
-    using ListIt = typename std::list<T>::iterator;
+    using ListIt = typename std::list<pairT>::iterator;
     std::unordered_map<KeyT, ListIt> map;
 
     KeyT pop_back() {
-        auto deleted_elem_key = list.back().id;
+        auto deleted_elem_key = list.back().first;
         map.erase(deleted_elem_key);
         list.pop_back();
 
         return deleted_elem_key;
     }
+
+    void push_front(KeyT key, T value) {
+        list.push_front(std::pair<KeyT, T>{key, value});
+        map[key] = list.begin();
+    }
+
+    size_t size() {
+        return list.size();
+    }
 };
 
 template <typename T, typename KeyT>
 class Cache2Q {
-    struct CacheCell {
-        KeyT id;
-        T data;
-    };
-
     size_t size;                    // Overall size (in pages)
 
     size_t Kin;                     // max size of A1_in
     size_t Kout;                    // max size of A1_out
 
-    HashList<KeyT, CacheCell> Am;
-    HashList<KeyT, CacheCell> A1_in;
-
-    std::list<KeyT> A1_out;         // Stores only ids
-
-    using ListItKeyT = typename std::list<KeyT>::iterator;
-    std::unordered_map<KeyT, ListItKeyT> A1_out_map;
+    HashList<KeyT, T> Am;
+    HashList<KeyT, T> A1_in;
+    HashList<KeyT, KeyT> A1_out;         // Stores only ids but still needs hashlist
 
     bool full() const {
         return (Am.list.size() + A1_in.list.size()) == size;
@@ -47,9 +51,9 @@ class Cache2Q {
     void reclaim_for_page();
 
 public:
-    Cache2Q(size_t size, double In_part = .25, double Out_part = .50) : size(size) {
-        Kin = ((double) size) * In_part;
-        Kout = ((double) size) * Out_part;
+    Cache2Q(size_t size, double in_part = .25, double out_part = .50) : size(size) {
+        Kin  = (size_t) (((double) size) * in_part);
+        Kout = (size_t) (((double) size) * out_part);
     }
     ~Cache2Q() {}
 
@@ -67,17 +71,12 @@ void Cache2Q<T, KeyT>::reclaim_for_page() {
     if (! full())
         return;
 
-    if (A1_in.list.size() > Kin) {
+    if (A1_in.size() > Kin) {
         auto to_out_page_id = A1_in.pop_back();
+        A1_out.push_front(to_out_page_id, to_out_page_id);
 
-        A1_out.push_front(to_out_page_id);
-        A1_out_map[to_out_page_id] = A1_out.begin();
-
-        if (A1_out.size() > Kout) {
-            auto deleted_id = A1_out.back();
-            A1_out_map.erase(deleted_id);
+        if (A1_out.size() > Kout)
             A1_out.pop_back();
-        }
 
         return;
     }
@@ -98,12 +97,10 @@ bool Cache2Q<T, KeyT>::lookup_update(KeyT key, F slow_get_page) {
         return true;
     }
 
-    auto a1_out_hit = A1_out_map.find(key);
-    if (a1_out_hit != A1_out_map.end()) {
+    auto a1_out_hit = A1_out.map.find(key);
+    if (a1_out_hit != A1_out.map.end()) {
         reclaim_for_page();
-
-        Am.list.push_front(CacheCell{key, slow_get_page(key)});
-        Am.map[key] = Am.list.begin();
+        Am.push_front(key, slow_get_page(key));
 
         return false;
     }
@@ -114,8 +111,7 @@ bool Cache2Q<T, KeyT>::lookup_update(KeyT key, F slow_get_page) {
     }
 
     reclaim_for_page();
-    Am.list.push_front(CacheCell{key, slow_get_page(key)});
-    Am.map[key] = Am.list.begin();
+    A1_in.push_front(key, slow_get_page(key));
 
     return false;
 }
