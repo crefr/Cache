@@ -29,16 +29,16 @@ int main(int argc, char **argv) {
 
     size_t hits = 0;
     for (size_t index: test_ids) {
-        std::cout << "size is " << my_cache.get_real_size() << std::endl;
-        std::cout << "Current element is " << index << " ";
+        // std::cout << "size is " << my_cache.get_real_size() << std::endl;
+        // std::cout << "Current element is " << index << " ";
         if (my_cache.lookup_update(index, slow_get_page_mock)) {
             hits++;
-            std::cout << "Hit!" << std::endl;
+            // std::cout << "Hit!" << std::endl;
         }
         else {
-            std::cout << "No Hit!" << std::endl;
+            // std::cout << "No Hit!" << std::endl;
         }
-        std::cout << "size is " << my_cache.get_real_size() << std::endl;
+        // std::cout << "size is " << my_cache.get_real_size() << std::endl;
     }
 
     std::cout << hits << std::endl;

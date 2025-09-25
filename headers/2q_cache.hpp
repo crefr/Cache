@@ -4,7 +4,6 @@
 using std::size_t;
 
 // List and hasmap combined
-//! T must have id as its field (type of id is KeyT)
 template <typename KeyT, typename T>
 struct HashList {
     std::list<T> list;
@@ -41,7 +40,7 @@ class Cache2Q {
     using ListItKeyT = typename std::list<KeyT>::iterator;
     std::unordered_map<KeyT, ListItKeyT> A1_out_map;
 
-    bool full() {
+    bool full() const {
         return (Am.list.size() + A1_in.list.size()) == size;
     }
 
