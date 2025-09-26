@@ -17,13 +17,19 @@ if [ ! -f "$TESTER" ]; then
     exit 1
 fi
 
+test_log_file="${TEST%.*}.log"
+test_ans_file="${TEST%.*}.ans"
+
 if [ ! -f "$TEST" ]; then
     echo "Error: Test '$TEST' not found" >&2
     exit 1
 fi
 
-test_log_file="${TEST%.*}.log"
-test_ans_file="${TEST%.*}.ans"
+if [ ! -f "$test_ans_file" ]; then
+    echo "Warn: Test answer '$test_ans_file' not found, making new" >&2
+    "$TESTER" < "$TEST" > "$test_ans_file"
+    exit 0
+fi
 
 "$TESTER" < "$TEST" > "$test_log_file"
 
