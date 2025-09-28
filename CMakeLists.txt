@@ -22,4 +22,10 @@ foreach(file ${testFiles})
              COMMAND bash -c "${CMAKE_SOURCE_DIR}/run_test.sh ./cache ${file}"
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
     set_tests_properties(${file} PROPERTIES DEPENDS cache)
+
+    add_test(NAME "${file}_ideal"
+             COMMAND bash -c "${CMAKE_SOURCE_DIR}/run_test_ideal.sh ./ideal ${file}"
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties("${file}_ideal" PROPERTIES DEPENDS ideal)
+
 endforeach()
