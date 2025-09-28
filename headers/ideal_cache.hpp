@@ -75,7 +75,7 @@ public:
                 // Need to free space
                 auto page_to_erase = std::prev(step_page_cache.end())->second;
                 step_page_cache.erase(std::prev(step_page_cache.end()));
-                cache.erase(page);
+                cache.erase(page_to_erase);
             }
         }
 
